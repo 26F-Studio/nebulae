@@ -44,7 +44,7 @@ const tryRemove = (index: number) => {
           {{ i18n('labels.title') }}
         </div>
         <q-btn
-          :label="i18n('labels.newMessage')"
+          :label="$q.screen.gt.sm ? i18n('labels.newMessage') : undefined"
           color="positive"
           icon="mdi-text-box-plus-outline"
           no-caps

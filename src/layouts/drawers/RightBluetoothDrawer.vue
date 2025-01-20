@@ -26,7 +26,7 @@ const tabs = [
 ] as const
 
 const currentTab = ref<string>(tabs[0].name)
-const width = ref(370)
+const width = ref(screen.gt.sm ? 420 : 370)
 
 const i18n = i18nSubPath('layouts.drawers.RightBluetoothDrawer')
 

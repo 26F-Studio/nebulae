@@ -9,18 +9,24 @@ import SearchDialog from 'components/bluetooth/dialogs/SearchDialog.vue'
 import { bus } from 'boot/bus'
 import { i18nSubPath } from 'src/utils/common'
 import { useBluetoothStore } from 'stores/bluetooth'
+import DoubleCheckButton from 'components/DoubleCheckButton.vue'
 
 const { recognizedDevices, savedMessages, connectedDevices, recordedMessagesDict, selectedDevice } =
   storeToRefs(useBluetoothStore())
 
 const scrollArea = ref<QScrollArea>()
 
-const recordedMessages = computed(
-  () =>
+const recordedMessages = computed({
+  get: () =>
     (selectedDevice.value.device?.id
       ? recordedMessagesDict.value[selectedDevice.value.device?.id]
       : []) ?? [],
-)
+  set: (value) => {
+    if (selectedDevice.value.device?.id) {
+      recordedMessagesDict.value[selectedDevice.value.device?.id] = value
+    }
+  },
+})
 
 const i18n = i18nSubPath('pages.BluetoothPage')
 
@@ -52,13 +58,25 @@ watch(
     <device-selector />
     <q-card class="col-grow row" bordered flat>
       <div class="col-grow">
-        <div class="q-pa-md text-h6">
-          {{ i18n('labels.messages') }}
+        <div class="row justify-between q-pa-md">
+          <div class="text-h6">
+            {{ i18n('labels.messages') }}
+          </div>
+          <double-check-button
+            color="negative"
+            icon="mdi-delete-sweep"
+            :label="i18n('labels.clearMessages')"
+            no-caps
+            outline
+            :pending-label="i18n('labels.confirm')"
+            style="white-space: pre"
+            @confirm="recordedMessages = []"
+          />
         </div>
         <q-separator />
         <div class="column full-width full-height" style="padding-bottom: 4rem">
           <q-scroll-area ref="scrollArea" class="full-height">
-            <q-list separator>
+            <q-list v-show="recordedMessages.length" separator>
               <q-item
                 v-for="(recordedMessage, index) in recordedMessages"
                 :key="index"

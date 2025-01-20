@@ -103,6 +103,8 @@ export default {
     BluetoothPage: {
       labels: {
         messages: '消息',
+        clearMessages: '清除消息',
+        confirm: '确认清除',
         characteristicId: '特征 ID: ',
       },
     },

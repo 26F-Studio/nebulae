@@ -71,9 +71,17 @@ const remove = (key: string, details: QSliderItemActionDetails) => {
               <q-btn
                 :color="connectedDevices[recognizedDevice.id] ? 'grey' : 'primary'"
                 :disable="!!connectedDevices[recognizedDevice.id]"
-                icon="mdi-link-plus"
+                :icon="
+                  connectedDevices[recognizedDevice.id]
+                    ? 'mdi-check-circle-outline'
+                    : 'mdi-link-plus'
+                "
                 :label="
-                  i18n(`labels.${connectedDevices[recognizedDevice.id] ? 'connected' : 'connect'}`)
+                  $q.screen.gt.sm
+                    ? i18n(
+                        `labels.${connectedDevices[recognizedDevice.id] ? 'connected' : 'connect'}`,
+                      )
+                    : undefined
                 "
                 no-caps
                 :outline="!!connectedDevices[recognizedDevice.id]"

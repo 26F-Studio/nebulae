@@ -103,6 +103,8 @@ export default {
     BluetoothPage: {
       labels: {
         messages: 'Messages',
+        clearMessages: 'Clear Messages',
+        confirm: '  Confirm Clear  ',
         characteristicId: 'Characteristic ID: ',
       },
     },

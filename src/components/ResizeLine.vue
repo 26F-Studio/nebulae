@@ -71,7 +71,7 @@ const handleResize: TouchPanValue = (event) => {
     :style="{
       cursor: 'col-resize',
       opacity: resizerVisibility,
-      width: `${thickness}px`
+      width: `${thickness}px`,
     }"
   />
 </template>
