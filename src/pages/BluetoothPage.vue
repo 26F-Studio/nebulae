@@ -44,10 +44,18 @@ if (!Object.keys(connectedDevices.value).length) {
                   ? recordedMessagesDict[selectedDevice.device?.id]
                   : []"
                 :key="index"
+                :class="{
+                  'bg-green-1': recordedMessage.isSent,
+                  'bg-blue-1': !recordedMessage.isSent,
+                }"
                 dense
               >
                 <q-item-section side>
-                  <q-icon :name="recordedMessage.isSent ? 'mdi-call-made' : 'mdi-call-received'" />
+                  <q-icon
+                    :color="recordedMessage.isSent ? 'green' : 'blue'"
+                    :name="recordedMessage.isSent ? 'mdi-call-made' : 'mdi-call-received'"
+                  />
+                  <q-icon :name="recordedMessage.isHex ? 'mdi-hexadecimal' : 'mdi-unicode'" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>
@@ -57,11 +65,9 @@ if (!Object.keys(connectedDevices.value).length) {
                     {{ recordedMessage.time.toFormat('HH:mm:ss.SSS') }}
                   </q-item-label>
                 </q-item-section>
-                <q-item-section side>
-                  <q-icon :name="recordedMessage.isHex ? 'mdi-hexadecimal' : 'mdi-unicode'" />
-                </q-item-section>
                 <q-tooltip>{{ i18n('labels.characteristicId') }}{{ recordedMessage.id }}</q-tooltip>
               </q-item>
+              <q-separator />
             </q-list>
           </q-scroll-area>
         </div>

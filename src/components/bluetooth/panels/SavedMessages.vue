@@ -2,11 +2,11 @@
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 
-import { bus } from 'boot/bus'
 import { i18nSubPath } from 'src/utils/common'
 import { useBluetoothStore } from 'stores/bluetooth'
 
-const { savedMessages } = storeToRefs(useBluetoothStore())
+const { savedMessages, selectedDevice } = storeToRefs(useBluetoothStore())
+const { send } = useBluetoothStore()
 
 const pendingRemoveIndex = ref<number>()
 
@@ -20,8 +20,10 @@ const updateSavedMessage = (index: number, message: string | number | null) => {
   savedMessages.value[index] = message ? message.toString() : ''
 }
 
-const loadSavedMessage = (message: string) => {
-  bus.emit('message', 'load', message, false)
+const sendSavedMessage = async (message: string) => {
+  if (message) {
+    await send(message, false)
+  }
 }
 
 const tryRemove = (index: number) => {
@@ -78,9 +80,10 @@ const tryRemove = (index: number) => {
           <q-btn
             color="primary"
             dense
+            :disable="!selectedDevice.characteristicId || !savedMessage"
             icon="mdi-send"
             round
-            @click="loadSavedMessage(savedMessage)"
+            @click="sendSavedMessage(savedMessage)"
           />
         </q-item-section>
       </q-item>

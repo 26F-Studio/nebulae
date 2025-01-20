@@ -15,7 +15,7 @@ const i18n = i18nSubPath('layouts.footers.BluetoothFooter')
 
 const sendMessage = async () => {
   if (message.value) {
-    console.log(await send(message.value, isHex.value))
+    await send(message.value, isHex.value)
   }
 }
 </script>
@@ -50,8 +50,8 @@ const sendMessage = async () => {
       </div>
       <div>
         <q-btn
-          :disable="!selectedDevice.characteristicId || !message"
           color="primary"
+          :disable="!selectedDevice.characteristicId || !message"
           icon="send"
           no-caps
           round
