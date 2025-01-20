@@ -217,7 +217,6 @@ export class DeviceWrapper {
       try {
         await characteristic.startNotifications()
         characteristic.addEventListener('characteristicvaluechanged', (event: Event) => {
-          console.log(event)
           const value = (<BluetoothRemoteGATTCharacteristic>event.target).value
           if (value) {
             this._notifyHandler?.(characteristic.uuid, new TextDecoder().decode(value))

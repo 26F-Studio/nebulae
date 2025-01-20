@@ -45,6 +45,7 @@ const refreshDevice = async () => {
 
 const selectDevice = async (device: DeviceWrapper) => {
   selectedDevice.value.device = device
+  selectedDevice.value.characteristicId = undefined
   await refreshDevice()
 }
 </script>

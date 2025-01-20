@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { Dialog } from 'quasar'
+import { Dialog, QScrollArea } from 'quasar'
+import { computed, ref, watch } from 'vue'
 
 import DeviceSelector from 'components/bluetooth/DeviceSelector.vue'
 import SearchDialog from 'components/bluetooth/dialogs/SearchDialog.vue'
@@ -11,6 +12,15 @@ import { useBluetoothStore } from 'stores/bluetooth'
 
 const { recognizedDevices, savedMessages, connectedDevices, recordedMessagesDict, selectedDevice } =
   storeToRefs(useBluetoothStore())
+
+const scrollArea = ref<QScrollArea>()
+
+const recordedMessages = computed(
+  () =>
+    (selectedDevice.value.device?.id
+      ? recordedMessagesDict.value[selectedDevice.value.device?.id]
+      : []) ?? [],
+)
 
 const i18n = i18nSubPath('pages.BluetoothPage')
 
@@ -25,6 +35,16 @@ if (!Object.keys(connectedDevices.value).length) {
 } else if (savedMessages.value.length) {
   bus.emit('drawer', 'open', 'right')
 }
+
+watch(
+  () => recordedMessages.value.length,
+  () => {
+    console.log(recordedMessages.value.length)
+    setTimeout(() => {
+      scrollArea.value?.setScrollPercentage('vertical', 1.0)
+    }, 100)
+  },
+)
 </script>
 
 <template>
@@ -37,12 +57,10 @@ if (!Object.keys(connectedDevices.value).length) {
         </div>
         <q-separator />
         <div class="column full-width full-height" style="padding-bottom: 4rem">
-          <q-scroll-area class="full-height">
+          <q-scroll-area ref="scrollArea" class="full-height">
             <q-list separator>
               <q-item
-                v-for="(recordedMessage, index) in selectedDevice.device?.id
-                  ? recordedMessagesDict[selectedDevice.device?.id]
-                  : []"
+                v-for="(recordedMessage, index) in recordedMessages"
                 :key="index"
                 :class="{
                   'bg-green-1': recordedMessage.isSent,
@@ -55,14 +73,15 @@ if (!Object.keys(connectedDevices.value).length) {
                     :color="recordedMessage.isSent ? 'green' : 'blue'"
                     :name="recordedMessage.isSent ? 'mdi-call-made' : 'mdi-call-received'"
                   />
-                  <q-icon :name="recordedMessage.isHex ? 'mdi-hexadecimal' : 'mdi-unicode'" />
                 </q-item-section>
-                <q-item-section>
-                  <q-item-label>
-                    {{ recordedMessage.message }}
-                  </q-item-label>
+                <q-item-section side>
                   <q-item-label caption>
                     {{ recordedMessage.time.toFormat('HH:mm:ss.SSS') }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label style="white-space: pre">
+                    {{ recordedMessage.message }}
                   </q-item-label>
                 </q-item-section>
                 <q-tooltip>{{ i18n('labels.characteristicId') }}{{ recordedMessage.id }}</q-tooltip>
