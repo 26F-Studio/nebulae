@@ -68,7 +68,20 @@ export const useBluetoothStore = defineStore(
         }
 
         newDevice.notifyHandler = (id, data) => {
-          console.log(`[Bluetooth] ${id}: ${data}`)
+          const recordedMessage = {
+            id,
+            message: data,
+            isHex: false,
+            isSent: false,
+            time: DateTime.now(),
+          }
+
+          const recordedMessages = recordedMessagesDict[newDevice.id]
+          if (recordedMessages) {
+            recordedMessages.push(recordedMessage)
+          } else {
+            recordedMessagesDict[newDevice.id] = [recordedMessage]
+          }
         }
 
         connectedDevices[newDevice.id] = newDevice

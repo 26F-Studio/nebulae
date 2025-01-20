@@ -3,7 +3,7 @@ import { Notify } from 'quasar'
 import { base64ToUuid, i18nSubPath, sleep } from 'src/utils/common'
 
 export class DeviceWrapper {
-  private _writableCharacteristics: BluetoothRemoteGATTCharacteristic[] = []
+  private _characteristics: BluetoothRemoteGATTCharacteristic[] = []
   private _device: BluetoothDevice
   private _notifyHandler?: (id: BluetoothCharacteristicUUID, data: string) => void
   // private _services: BluetoothRemoteGATTService[] = []
@@ -15,7 +15,7 @@ export class DeviceWrapper {
   }
 
   get writableCharacteristics(): BluetoothRemoteGATTCharacteristic[] {
-    return this._writableCharacteristics.filter(({ properties }) => properties.write)
+    return this._characteristics.filter(({ properties }) => properties.write)
   }
 
   get connected(): boolean {
@@ -64,8 +64,8 @@ export class DeviceWrapper {
     try {
       if (gattServer.connected) {
         this._addDisconnectHandler()
-        await this.load()
-        this._writableCharacteristics
+        await this.load(true)
+        this._characteristics
           .filter(({ properties }) => properties.notify)
           .forEach((characteristic) => this._listenNotify(characteristic))
         connectNotify({
@@ -130,26 +130,28 @@ export class DeviceWrapper {
         caption: this._deviceLabel,
       })
     }
+
     // this._services = services
 
-    services.map(async (service) => {
-      const characteristics = await service.getCharacteristics()
-      if (notify && !characteristics.length) {
-        Notify.create({
-          type: 'warning',
-          message: this._i18n('notifications.characteristic.unavailable'),
-          caption: [
-            this._deviceLabel,
-            this._i18n('labels.service', { serviceId: service.uuid }),
-          ].join('\n'),
-        })
-      }
-      // Merge without duplicates using Set
-      this._writableCharacteristics = [
-        ...new Set([...this._writableCharacteristics, ...characteristics]),
-      ]
-    })
-
+    const characteristics = (
+      await Promise.all(
+        services.map(async (service) => {
+          const characteristics = await service.getCharacteristics()
+          if (notify && !characteristics.length) {
+            Notify.create({
+              type: 'warning',
+              message: this._i18n('notifications.characteristic.unavailable'),
+              caption: [
+                this._deviceLabel,
+                this._i18n('labels.service', { serviceId: service.uuid }),
+              ].join('\n'),
+            })
+          }
+          return characteristics
+        }),
+      )
+    ).flat()
+    this._characteristics = [...new Set(characteristics)]
     return true
   }
 
@@ -198,13 +200,13 @@ export class DeviceWrapper {
       while (!this._terminated) {
         Notify.create({
           type: 'warning',
-          message: this._i18n('notifications.connection.reconnecting'),
+          message: this._i18n('notifications.gatt.reconnecting'),
           caption: this._deviceLabel,
         })
         if (await this.connect()) {
           return
         }
-        await sleep(3000)
+        await sleep(5000)
       }
     })
   }
@@ -215,6 +217,7 @@ export class DeviceWrapper {
       try {
         await characteristic.startNotifications()
         characteristic.addEventListener('characteristicvaluechanged', (event: Event) => {
+          console.log(event)
           const value = (<BluetoothRemoteGATTCharacteristic>event.target).value
           if (value) {
             this._notifyHandler?.(characteristic.uuid, new TextDecoder().decode(value))
