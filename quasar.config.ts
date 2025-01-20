@@ -82,7 +82,9 @@ export default defineConfig((ctx) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.base = process.env.DEPLOY_GITHUB_PAGE ? '/nebulae/' : '/'
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
