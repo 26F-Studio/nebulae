@@ -10,6 +10,7 @@ declare module 'vue' {
 
 export const bus = new EventBus<{
   drawer: (action: 'close' | 'open' | 'toggle', position: 'left' | 'right') => void
+  message: (action: 'load' | 'save', content: string, isHex: boolean) => void
 }>()
 
 // noinspection JSUnusedGlobalSymbols
